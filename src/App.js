@@ -1,7 +1,7 @@
-import { Alchemy, Network } from 'alchemy-sdk';
-import { useEffect, useState } from 'react';
+import { Alchemy, Network } from "alchemy-sdk";
+import { useEffect, useState } from "react";
 
-import './App.css';
+import "./App.css";
 
 // Refer to the README doc for more information about using API
 // keys in client-side code. You should never do this in production
@@ -10,7 +10,6 @@ const settings = {
   apiKey: process.env.REACT_APP_ALCHEMY_API_KEY,
   network: Network.ETH_MAINNET,
 };
-
 
 // In this week's lessons we used ethers.js. Here we are using the
 // Alchemy SDK is an umbrella library with several different packages.
@@ -21,16 +20,44 @@ const alchemy = new Alchemy(settings);
 
 function App() {
   const [blockNumber, setBlockNumber] = useState();
+  const [blockDetails, setBlockDetails] = useState([]);
+  const [blockWithTrxs, setBlockWithTrxs] = useState([]);
 
   useEffect(() => {
     async function getBlockNumber() {
       setBlockNumber(await alchemy.core.getBlockNumber());
     }
-
     getBlockNumber();
   });
 
-  return <div className="App">Block Number: {blockNumber}</div>;
+  async function getBlockDetails() {
+    setBlockDetails(await alchemy.core.getBlock(parseInt(blockNumber)));
+    console.log(blockDetails);
+  }
+
+  async function getBlockWithTrxs() {
+    setBlockWithTrxs(
+      await alchemy.core.getBlockWithTransactions(parseInt(blockNumber))
+    );
+  }
+
+  if (!blockNumber) {
+    return <div>Loading...please wait for a moment!</div>;
+  }
+
+  return (
+    <div>
+      <h1 className="heading">Welcome to the basic block explorer</h1>
+      <div className="App">Block Number: {blockNumber}</div>
+      <div className="fetch-button-BlockTrxs">
+        <button onClick={getBlockWithTrxs}>Block details</button>
+      </div>
+      <div align="center">Number:{blockWithTrxs.number}</div>
+      <div align="center">Hash: {blockWithTrxs.hash}</div>
+      <div align="center">Nonce: {blockWithTrxs.nonce}</div>
+      <div align="center">Timestamp: {blockWithTrxs.timestamp}</div>
+    </div>
+  );
 }
 
 export default App;
